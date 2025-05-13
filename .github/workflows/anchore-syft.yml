@@ -22,11 +22,5 @@ jobs:
         with:
           path: .
           format: cyclonedx-json
-          output-file: sbom-cyclonedx.json
+          output-file: AFjuicetest.json
           dependency-snapshot: true
-
-      - name: Upload SBOM artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: sbom-cyclonedx-json
-          path: sbom-cyclonedx.json
