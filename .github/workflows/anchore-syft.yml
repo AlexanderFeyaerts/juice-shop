@@ -1,4 +1,4 @@
-name: Generate SBOM
+name: Generate_SBOM # ✅ No dots
 
 on:
   push:
@@ -9,24 +9,24 @@ permissions:
   contents: write
 
 jobs:
-  generateSBOM:
-    name: Generate SBOM from source code
+  generate_sbom: # ✅ No dots or special characters
+    name: Generate SBOM from source
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Generate SBOM from source using Anchore
+      - name: Generate SBOM using Anchore
         uses: anchore/sbom-action@bb716408e75840bbb01e839347cd213767269d4a
         with:
           path: .
           format: cyclonedx-json
-          output-file: sbom.cyclonedx.json
+          output-file: sbom-cyclonedx.json
           dependency-snapshot: true
 
       - name: Upload SBOM artifact
         uses: actions/upload-artifact@v4
         with:
           name: sbom-cyclonedx-json
-          path: sbom.cyclonedx.json
+          path: sbom-cyclonedx.json
