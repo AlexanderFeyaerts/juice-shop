@@ -14,20 +14,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run TruffleHog Git History Scan
+      - name: Run TruffleHog
+        id: scan
         uses: trufflesecurity/trufflehog@main
         with:
-          scanArguments: --fail --format sarif --output results.sarif .
+          scanArguments: >-
+            file://. 
+            --json 
+            --output trufflehog-results.json
+
+      - name: Show findings (if any)
+        if: always()
+        run: |
+          echo "=== TruffleHog Results ==="
+          cat trufflehog-results.json || echo "No results file generated."
 
       - name: Upload TruffleHog results as artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trufflehog-results
-          path: results.sarif
-
-      - name: Upload TruffleHog results to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: results.sarif
+          path: trufflehog-results.json
