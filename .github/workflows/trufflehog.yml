@@ -1,41 +1,40 @@
-name: TruffleHog Secret Scan
-
+name: "Secrets"
 on:
   push:
-    branches: [ main, master ]
+    branches-ignore:
+      - l10n_develop
+      - gh-pages
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
+      - 'monitoring/grafana-dashboard.json'
+      - 'screenshots/**'
+    tags-ignore:
+      - '*'
   pull_request:
-    branches: [ main, master ]
-  schedule:
-    - cron: '0 0 * * *'  # Daily scan at midnight
-
+    paths-ignore:
+      - '*.md'
+      - 'LICENSE'
+      - 'data/static/i18n/*.json'
+      - 'frontend/src/assets/i18n/*.json'
 jobs:
-  secret_scan:
+  Secrets_management:
+    #needs: [DAST]
     runs-on: ubuntu-latest
+    permissions: 
+      contents: read 
+      id-token: write 
+      issues: write 
+      pull-requests: write
+    defaults: 
+      run: 
+        shell: bash 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Get full git history
-
-    - name: Run TruffleHog Scan
-      uses: trufflesecurity/trufflehog@main
+        fetch-depth: 0
+        ref: master
+    - name: trufflehog-actions-scan
+      uses: edplato/trufflehog-actions-scan@master
       with:
-        # Basic scanning (recommended for most cases)
-        extra_args: >-
-          --only-verified
-          --json
-          --fail
-          git
-          "file://$(pwd)"
-          --since-commit HEAD~50
-        head: master
-        
-        # Alternative more aggressive scanning (more false positives)
-        # extra_args: >-
-        #   --no-verification
-        #   --entropy=true
-        #   --regex
-        #   --fail
-        #   git
-        #   "file://$(pwd)"
-        #   --since-commit HEAD~50
+        scanArguments: "--regex --entropy=False --max_depth=5000 --rules /regexes.json" # Add custom options here*
