@@ -23,15 +23,11 @@ jobs:
           path: .
           format: cyclonedx-json
           output-file: sbom-cyclonedx.json
-          upload-artifact: false 
-
+          upload-artifact: false   # Prevents GitHub artifact upload
 
       - name: Upload SBOM to Portasecura
-        env:
-          PORTASECURA_API_URL: https://dependency.portasecura.com/api/v1/bom
-          PORTASECURA_API_TOKEN: "6333c073-d740-4994-bbdf-7a2998144774"
         run: |
-          curl -X POST "$PORTASECURA_API_URL" \
-            -H "Authorization: Bearer $PORTASECURA_API_TOKEN" \
+          curl -X POST "https://dependency.portasecura.com/api/v1/bom" \
+            -H "Authorization: Bearer 6333c073-d740-4994-bbdf-7a2998144774" \
             -H "Content-Type: application/json" \
-            --data-binary @sbom-cyclonedx.json
+            --data-binary @.sbom/sbom-cyclonedx.json
