@@ -2,36 +2,19 @@ name: TruffleHog Secret Scan
 
 on:
   push:
-    branches: [ "master" ]
+    branches:
+      - main
   pull_request:
-  workflow_dispatch:
 
 jobs:
-  trufflehog-scan:
+  test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Run TruffleHog
-        id: scan
-        uses: trufflesecurity/trufflehog@main
-        with:
-          scanArguments: >-
-            file://. 
-            --json 
-            --output trufflehog-results.json
-
-      - name: Show findings (if any)
-        if: always()
-        run: |
-          echo "=== TruffleHog Results ==="
-          cat trufflehog-results.json || echo "No results file generated."
-
-      - name: Upload TruffleHog results as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trufflehog-results
-          path: trufflehog-results.json
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Secret Scanning
+      uses: trufflesecurity/trufflehog@main
+      with:
+        extra_args: --results=verified,unknown
