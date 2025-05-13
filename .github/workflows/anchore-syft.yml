@@ -1,4 +1,4 @@
-name: Generate_SBOM # ✅ No dots
+name: Generate_SBOM
 
 on:
   push:
@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  generate_sbom: # ✅ No dots or special characters
-    name: Generate SBOM from source
+  generate_sbom:
+    name: Generate and Upload SBOM
     runs-on: ubuntu-latest
 
     steps:
@@ -22,5 +22,14 @@ jobs:
         with:
           path: .
           format: cyclonedx-json
-          output-file: AFjuicetest.json
-          dependency-snapshot: true
+          output-file: sbom-cyclonedx.json
+
+      - name: Upload SBOM to Portasecura
+        env:
+          PORTASECURA_API_URL: https://dependency.portasecura.com/api/v1/bom
+          PORTASECURA_API_TOKEN: ${{6333c073-d740-4994-bbdf-7a2998144774}}
+        run: |
+          curl -X POST "$PORTASECURA_API_URL" \
+            -H "Authorization: Bearer $PORTASECURA_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @sbom-cyclonedx.json
