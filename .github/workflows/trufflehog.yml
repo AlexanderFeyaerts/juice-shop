@@ -2,11 +2,11 @@ name: TruffleHog Secret Scan
 
 on:
   push:
-    branches:
-      - master
+    branches: [ main, master ]
   pull_request:
-    branches:
-      - master
+    branches: [ main, master ]
+  schedule:
+    - cron: '0 0 * * *'  # Daily scan at midnight
 
 jobs:
   secret_scan:
@@ -15,22 +15,27 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0 # Get full git history
+        fetch-depth: 0  # Get full git history
 
-    - name: Run TruffleHog (thorough scan)
+    - name: Run TruffleHog Scan
       uses: trufflesecurity/trufflehog@main
       with:
+        # Basic scanning (recommended for most cases)
         extra_args: >-
-          --no-update
+          --only-verified
           --json
-          --entropy=0
-          --regex
-          --rules /path/to/custom/rules.json # Optional custom rules
-          --since-commit HEAD~100 # Scan last 100 commits
-          --branch master
           --fail
-          --max-depth=10000
-          --no-verification # Show unverified results too
-          --no-filter
-          --concurrency=10
+          git
+          "file://$(pwd)"
+          --since-commit HEAD~50
         head: master
+        
+        # Alternative more aggressive scanning (more false positives)
+        # extra_args: >-
+        #   --no-verification
+        #   --entropy=true
+        #   --regex
+        #   --fail
+        #   git
+        #   "file://$(pwd)"
+        #   --since-commit HEAD~50
