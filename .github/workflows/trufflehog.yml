@@ -1,0 +1,33 @@
+name: TruffleHog Secret Scan
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  trufflehog-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run TruffleHog Git History Scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          scanArguments: --fail --format sarif --output results.sarif .
+
+      - name: Upload TruffleHog results as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trufflehog-results
+          path: results.sarif
+
+      - name: Upload TruffleHog results to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
